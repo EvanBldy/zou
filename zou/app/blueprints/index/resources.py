@@ -5,7 +5,7 @@ import requests
 from datetime import datetime
 
 from flask import Response, abort
-from flask_restful import Resource
+from flask_restx import Resource
 from zou import __version__
 
 from zou.app import app, config

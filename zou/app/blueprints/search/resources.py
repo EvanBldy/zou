@@ -1,4 +1,4 @@
-from flask_restful import Resource
+from flask_restx import Resource
 from flask_jwt_extended import jwt_required
 
 from zou.app.mixin import ArgsMixin
@@ -23,5 +23,5 @@ class SearchResource(Resource, ArgsMixin):
 
         return {
             "assets": index_service.search_assets(query, open_project_ids),
-            "persons": persons
+            "persons": persons,
         }
