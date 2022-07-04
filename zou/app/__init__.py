@@ -10,6 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_mail import Mail
 from jwt import ExpiredSignatureError
+from flasgger import Swagger
 
 from . import config
 from .stores import auth_tokens_store
@@ -52,6 +53,7 @@ cache.cache.init_app(app)  # Function caching
 flask_fs.init_app(app)  # To save files in object storage
 mail = Mail()
 mail.init_app(app)  # To send emails
+swagger = Swagger(app)
 
 
 @app.teardown_appcontext

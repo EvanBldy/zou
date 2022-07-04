@@ -136,6 +136,26 @@ class AuthenticatedResource(Resource):
 
     @jwt_required
     def get(self):
+        """
+        This examples uses FlaskRESTful Resource
+        It works also with swag_from, schemas and spec_dict
+        ---
+        parameters:
+          - in: path
+            name: username
+            type: string
+            required: true
+        responses:
+          200:
+            description: A single user item
+            schema:
+              id: User
+              properties:
+                username:
+                  type: string
+                  description: The name of the user
+                  default: Steven Wilson
+        """
         try:
             person = persons_service.get_person_by_email(
                 get_jwt_identity(), relations=True
