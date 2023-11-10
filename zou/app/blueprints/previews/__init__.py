@@ -102,15 +102,15 @@ routes = [
         ProjectThumbnailResource,
     ),
     (
-        "/pictures/preview-backgrounds-files/<instance_id>",
+        "/pictures/preview-background-files/<instance_id>",
         CreatePreviewBackgroundFileResource,
     ),
     (
-        "/pictures/thumbnails/preview-backgrounds-files/<instance_id>.png",
+        "/pictures/thumbnails/preview-background-files/<instance_id>.png",
         PreviewBackgroundFileThumbnailResource,
     ),
     (
-        "/pictures/preview-backgrounds-files/<instance_id>.<extension>",
+        "/pictures/preview-background-files/<instance_id>.<extension>",
         PreviewBackgroundFileResource,
     ),
     (
