@@ -1329,7 +1329,7 @@ class CreatePreviewBackgroundFileResource(Resource):
             )
             if extension == "hdr":
                 thumbnail_path = thumbnail_utils.turn_hdr_into_thumbnail(
-                    thumbnail_path
+                    preview_background_path
                 )
                 file_store.add_picture(
                     "thumbnails", instance_id, thumbnail_path
