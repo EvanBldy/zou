@@ -8,6 +8,8 @@ import traceback
 import gazu
 import sqlalchemy
 
+from http.client import responses as http_responses
+
 from zou.app.models.attachment_file import AttachmentFile
 from zou.app.models.build_job import BuildJob
 from zou.app.models.custom_action import CustomAction
@@ -815,15 +817,12 @@ def download_thumbnail_from_another_instance(
             if attemps_count > 0:
                 time.sleep(0.5)
             try:
-                response = gazu.client.download(path, file_path)
-                if response.status_code == 404:
-                    logger.error(f"Not found ({path}).")
-                elif response.status_code == 500:
-                    logger.error(f"Error while downloading ({path}).")
+                download_from_another_instance(path, file_path)
             except Exception:
                 if attemps_count + 1 == number_attemps:
                     logger.error(f"Download failed ({path}):")
                     logger.error(traceback.format_exc())
+                continue
             if os.path.exists(file_path):
                 try:
                     file_store.add_picture("thumbnails", model_id, file_path)
@@ -935,15 +934,12 @@ def download_file_from_another_instance(
         if attemps_count > 0:
             time.sleep(0.5)
         try:
-            response = gazu.client.download(path, file_path)
-            if response.status_code == 404:
-                logger.error(f"Not found ({path}).")
-            elif response.status_code == 500:
-                logger.error(f"Error while downloading ({path}).")
+            download_from_another_instance(path, file_path)
         except Exception:
             if attemps_count + 1 == number_attemps:
                 logger.error(f"Download failed ({path}):")
                 logger.error(traceback.format_exc())
+            continue
         if os.path.exists(file_path):
             try:
                 save_func(prefix, preview_file_id, file_path)
@@ -998,15 +994,12 @@ def download_attachment_file_from_another_instance(
         if attemps_count > 0:
             time.sleep(0.5)
         try:
-            response = gazu.client.download(path, file_path)
-            if response.status_code == 404:
-                logger.error(f"Not found ({path}).")
-            elif response.status_code == 500:
-                logger.error(f"Error while downloading ({path}).")
+            download_from_another_instance(path, file_path)
         except Exception:
             if attemps_count + 1 == number_attemps:
                 logger.error(f"Download failed ({path}):")
                 logger.error(traceback.format_exc())
+            continue
         if os.path.exists(file_path):
             try:
                 file_store.add_file(
@@ -1020,3 +1013,17 @@ def download_attachment_file_from_another_instance(
                     logger.error(traceback.format_exc())
             finally:
                 os.remove(file_path)
+
+
+def download_from_another_instance(path, file_path):
+    response = gazu.client.download(path, file_path)
+    if response.status_code != 200:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        logger.error(
+            f"Error while downloading ({path}): {response.status_code} {http_responses[response.status_code]}."
+        )
+        raise Exception(
+            f"Error while downloading ({path}): {response.status_code} {http_responses[response.status_code]}."
+        )
+    return path, file_path
