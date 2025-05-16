@@ -5,7 +5,11 @@ from pathlib import Path
 
 from zou.app import config, db
 from zou.app.models.plugin import Plugin
-from zou.app.utils.plugins import PluginManifest
+from zou.app.utils.plugins import (
+    PluginManifest,
+    run_plugin_migrations,
+    downgrade_plugin_migrations,
+)
 
 
 def install_plugin(path, force=False):
@@ -33,7 +37,10 @@ def install_plugin(path, force=False):
         else:
             plugin = Plugin.create_no_commit(**manifest.to_model_dict())
 
-        install_plugin_files(manifest.id, path, already_installed)
+        plugin_path = install_plugin_files(
+            manifest.id, path, already_installed
+        )
+        run_plugin_migrations(plugin_path, plugin)
     except Exception:
         uninstall_plugin_files(manifest.id)
         db.session.rollback()
@@ -67,11 +74,11 @@ def install_plugin_files(plugin_id, path, already_installed=False):
     return plugin_path
 
 
-def uninstall_plugin_files(plugin_id):
+def uninstall_plugin_files(plugin_path):
     """
     Uninstall plugin files.
     """
-    plugin_path = Path(config.PLUGIN_FOLDER) / plugin_id
+    plugin_path = Path(plugin_path)
     if plugin_path.exists():
         shutil.rmtree(plugin_path)
         return True
@@ -82,7 +89,9 @@ def uninstall_plugin(plugin_id):
     """
     Uninstall a plugin.
     """
-    installed = uninstall_plugin_files(plugin_id)
+    plugin_path = Path(config.PLUGIN_FOLDER) / plugin_id
+    downgrade_plugin_migrations(plugin_path)
+    installed = uninstall_plugin_files(plugin_path)
     plugin = Plugin.query.filter_by(plugin_id=plugin_id).one_or_none()
     if plugin is not None:
         installed = True
